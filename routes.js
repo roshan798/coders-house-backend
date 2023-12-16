@@ -6,7 +6,8 @@ const router = Router();
 
 router.post('/api/v1/send-otp', authController.sendOtp);
 router.post('/api/v1/verify-otp', authController.verifyOtp);
-router.post('/api/v1/activate',authMiddleware, activateController.activate);
+router.post('/api/v1/activate', authMiddleware, activateController.activate);
 router.get('/api/v1/refresh', authController.refreshAccessToken);
+router.post('/api/v1/logout', authMiddleware, authController.logout);
 
 export default router;

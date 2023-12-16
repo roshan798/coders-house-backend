@@ -1,6 +1,7 @@
 import tokenService from "../services/tokenService.js";
 
 export default async function (req, res, next) {
+    console.log("inside auth middleware");
     try {
         const { accessToken } = req.cookies;
         if (!accessToken) {
@@ -13,7 +14,6 @@ export default async function (req, res, next) {
         req.user = userData;
         console.log(userData);
     } catch (error) {
-        console.log("inside auth middleware");
         // console.error(error);
         return res.status(401).json({
             message: "Invalid token"

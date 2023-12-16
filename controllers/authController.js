@@ -43,7 +43,7 @@ class authController {
 
     async verifyOtp(req, res) {
         const { otp, hash, phone } = req.body;
-        console.log(otp, hash, phone);
+        // console.log(otp, hash, phone);
         if (!phone || !otp || !hash) {
             return res.status(400).json({
                 message: "All fields are required"
@@ -160,6 +160,21 @@ class authController {
         });
     }
 
+    async logout(req, res) {
+        // delete tokens from db 
+        const { refreshToken } = req.cookies;
+        tokenService.removeToken(refreshToken)
+        res.clearCookie('refreshToken');
+        res.clearCookie('accessToken');
+        res.json(
+            {
+                user: null,
+                auth: false
+            }
+        )
+
+        // delete cookies
+    }
 }
 
 export default (new authController());

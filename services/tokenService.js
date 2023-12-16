@@ -52,6 +52,9 @@ class TokenService {
     async updateRefreshToken(userId, refreshToken) {
         return await refreshModal.updateOne({ _id: userId }, { token: refreshToken })
     }
+    async removeToken(refreshToken) {
+        return await refreshModal.deleteOne({ token: refreshToken });
+    }
 }
 
 export default new TokenService();
