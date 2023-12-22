@@ -18,22 +18,25 @@ class ActivateController {
                 message: "All fields are required"
             });
         }
-        // const { user } = req;
-        const buffer = Buffer.from(avatar.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
-        const imagePath = `${Date.now()}-${Math.round(
-            Math.random() * 1e9
-        )}.png`
+        let imagePath = "default.png";
+        // if the avater is not selected then
+        if (avatar !== '/src/assets/Images/avatar.jpeg') {
+            const buffer = Buffer.from(avatar.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
+            imagePath = `${Date.now()}-${Math.round(
+                Math.random() * 1e9
+            )}.png`
 
-        try {
-            const jimpResponse = await Jimp.read(buffer);
-            const storagePath = path.resolve(__dirname, '../storage', imagePath);
+            try {
+                const jimpResponse = await Jimp.read(buffer);
+                const storagePath = path.resolve(__dirname, '../storage', imagePath);
 
-            jimpResponse.resize(150, Jimp.AUTO).write(storagePath)
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "could not process the image"
-            });
+                jimpResponse.resize(150, Jimp.AUTO).write(storagePath)
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                    message: "could not process the image"
+                });
+            }
         }
         // update user
         try {
@@ -61,7 +64,7 @@ class ActivateController {
             })
         }
     }
-   
+
 }
 
 export default new ActivateController();
