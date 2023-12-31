@@ -1,7 +1,6 @@
-import mongoose from "mongoose";;
+import mongoose, { get } from "mongoose";;
 
 const Schema = mongoose.Schema;
-
 const userSchema = new Schema({
     phone: {
         type: String,
@@ -13,7 +12,10 @@ const userSchema = new Schema({
     },
     avatar: {
         type: String,
-        require: false
+        require: false,
+        get: (avatar) => {
+            return `${process.env.BASE_URL}${avatar}`;
+        }
     },
 
     activated: {
@@ -22,7 +24,8 @@ const userSchema = new Schema({
         default: false
     },
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { getters: true }
 })
 
 export default mongoose.model('user', userSchema, 'users');

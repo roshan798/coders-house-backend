@@ -12,5 +12,6 @@ router.get('/api/v1/refresh', authController.refreshAccessToken);
 router.post('/api/v1/logout', authMiddleware, authController.logout);
 router.post('/api/v1/rooms', authMiddleware, roomsController.create)
 router.get('/api/v1/rooms', authMiddleware, roomsController.index)
+router.get('/api/v1/rooms/:roomId', authMiddleware, roomsController.show)
 
 export default router;

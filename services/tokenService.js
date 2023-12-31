@@ -6,7 +6,7 @@ class TokenService {
     generateTokens(payload) {
 
         const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-            expiresIn: '1m'
+            expiresIn: '1d'
         })
         const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
             expiresIn: '1y'
@@ -32,16 +32,6 @@ class TokenService {
         return jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
     }
     async findRefreshToken(userId, refreshToken) {
-        //erase comment
-        // let res = await refreshModal.findOne(
-        //     {
-        //         userId: userId,
-        //         token: refreshToken
-        //     }
-        // );
-        // console.log("inside find Refresh token");
-        // console.log(res);
-        // return res;
         return await refreshModal.findOne(
             {
                 userId: userId,

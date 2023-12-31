@@ -22,6 +22,10 @@ class RoomService {
             .exec();
         return rooms;
     }
+    async getRoom(roomid) {
+        const room = await roomModal.findOne({ _id: roomid });
+        return room;
+    }
 }
 
 /*

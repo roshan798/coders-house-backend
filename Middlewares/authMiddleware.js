@@ -1,7 +1,7 @@
 import tokenService from "../services/tokenService.js";
 
 export default async function (req, res, next) {
-    console.log("inside auth middleware");
+    // console.log("inside auth middleware");
     try {
         const { accessToken } = req.cookies;
         if (!accessToken) {
@@ -12,7 +12,7 @@ export default async function (req, res, next) {
             throw new Error();
         }
         req.user = userData;
-        console.log(userData);
+        // console.log(userData);
     } catch (error) {
         // console.error(error);
         return res.status(401).json({
