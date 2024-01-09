@@ -6,45 +6,47 @@ import UserDto from '../dtos/userDtos.js';
 
 class authController {
 
-
     async sendOtp(req, res) {
-        //logic 
-        const { phone } = req.body
-        if (!phone) {
+        const { type, sender } = req.body;
+        if (!sender) {
             return res.status(400).json({
-                message: "Phone Field is required."
+                message: `${type} Field is required.`
             });
         }
         const otp = await otpService.generateOtp();
         const TTL = 1000 * 60 * 24 * 5;  // 1000ms * 1s * 5min TTL -> Total Time Left\
         const expires = Date.now() + TTL;
         // this data will be hashed and send back to the client and the OTP is sent to the clients mobile
-        const data = `${phone}.${otp}.${expires}`;
+        const data = `${sender}.${otp}.${expires}`;
         const hash = HashService.hashOtp(data);
         try {
-            // const response = await otpService.sendBySMS(phone, otp);
-            // console.log('twilo response');
-            // console.log(response);
+            if (type === 'phone') {
+                // const response = await otpService.sendBySMS(sender, otp);
+                // console.log('twilo response');
+                // console.log(response);
+            }
+            else {
+                const response = await otpService.sendByEmail(sender, otp);
+            }
+            console.log(otp);
             return res.json({
                 hash: `${hash}.${expires}`,
-                phone,
+                sender,
                 otp // remove
             })
         } catch (error) {
             // console.log(error);
             return res.status(500).json({
-                message: "Failed to send otp",
-                error
+                message: "Failed to send otp"
             });
         }
-        // generate a 4 digit random  OTP
     }
 
 
+
     async verifyOtp(req, res) {
-        const { otp, hash, phone } = req.body;
-        // console.log(otp, hash, phone);
-        if (!phone || !otp || !hash) {
+        const { otp, hash, sender, type } = req.body;
+        if (!sender || !otp || !hash) {
             return res.status(400).json({
                 message: "All fields are required"
             });
@@ -55,7 +57,7 @@ class authController {
                 message: "otp expired"
             });
         }
-        const data = `${phone}.${otp}.${expires}`;
+        const data = `${sender}.${otp}.${expires}`;
         const isValid = otpService.verifyOtp(data, hashedOtp)
         if (isValid === false) {
             return res.status(400).json({
@@ -64,9 +66,17 @@ class authController {
         }
         let user;
         try {
-            user = await userService.findUser({ phone: phone });
-            if (!user) {
-                user = await userService.createUser({ phone })
+            if (type === 'phone') {
+                user = await userService.findUser({ phone: sender });
+                if (!user) {
+                    user = await userService.createUser({ phone: sender })
+                }
+            }
+            else {
+                user = await userService.findUser({ email: sender });
+                if (!user) {
+                    user = await userService.createUser({ email: sender })
+                }
             }
         } catch (error) {
             // console.log(error);
@@ -75,20 +85,41 @@ class authController {
                 error,
             });
         }
-        // console.log(user);
         const { accessToken, refreshToken } = tokenService.generateTokens({ _id: user._id, activated: false });
         await tokenService.storeRefreshToken(refreshToken, user._id);
+        /* 
+       const { secure } = req;
+     
+       console.log("secure", secure);
+     
+       res.cookie('refreshToken', refreshToken, { sameSite: 'none', Secure: secure, maxAge: 1000 * 60 * 60 * 24 * 30, httpOnly: true });
+       res.cookie('accessToken', accessToken, { sameSite: 'none', Secure: secure, maxAge: 1000 * 60 * 60 * 24 * 30, httpOnly: true });
+     
+      */
+
+        //  for local host 
         res.cookie('refreshToken', refreshToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true,
+            // sameSite: 'None', secure: true
         });
-        // console.log("Otp matched");
-        // console.log('Access-> ',accessToken);
-        // console.log('refresh-> ',refreshToken);
         res.cookie('accessToken', accessToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true,
+            // sameSite: 'None', secure: true
         });
+
+        // 
+        // res.cookie('refreshToken', refreshToken, {
+        //     maxAge: 1000 * 60 * 60 * 24 * 30,
+        //     httpOnly: true,
+        //     sameSite: 'None', secure: true
+        // });
+        // res.cookie('accessToken', accessToken, {
+        //     maxAge: 1000 * 60 * 60 * 24 * 30,
+        //     httpOnly: true,
+        //     sameSite: 'None', secure: true
+        // });
         const userDto = new UserDto(user);
         res.json({
             message: "OTP matched",
@@ -99,8 +130,6 @@ class authController {
 
 
     async refreshAccessToken(req, res) {
-        //get request token from cookie
-        // console.log(req.cookie);
         const { refreshToken: refreshTokenFromCookie } = req.cookies;
         //check if token is valid
         let userData;
@@ -142,18 +171,11 @@ class authController {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true,
         });
-        // console.log("Otp matched");
-        // console.log('Access-> ',accessToken);
-        // console.log('refresh-> ',refreshToken);
         res.cookie('accessToken', accessToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true,
         });
         const userDto = new UserDto(user);
-        // console.log("user");
-        // console.log(user);
-        // console.log("userDTO");
-        // console.log(userDto);
         res.json({
             user: userDto,
             auth: true,
@@ -161,7 +183,6 @@ class authController {
     }
 
     async logout(req, res) {
-        // delete tokens from db 
         const { refreshToken } = req.cookies;
         tokenService.removeToken(refreshToken)
         res.clearCookie('refreshToken');
@@ -172,8 +193,6 @@ class authController {
                 auth: false
             }
         )
-
-        // delete cookies
     }
 }
 

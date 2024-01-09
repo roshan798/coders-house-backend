@@ -19,6 +19,7 @@
     "jimp": "^0.22.10",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.1",
+    "nodemailer": "^6.9.8",
     "socket.io": "^4.7.2",
     "twilio": "^4.19.0"
   },

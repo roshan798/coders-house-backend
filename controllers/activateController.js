@@ -9,7 +9,7 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-//
+
 class ActivateController {
     async activate(req, res) {
         const { name, avatar } = req.body;

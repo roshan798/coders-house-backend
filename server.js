@@ -16,7 +16,7 @@ const server = http.createServer(app); // Use http.createServer
 // for socket
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',
+        origin: ['http://localhost:5173', 'http://192.168.225.40:5173'],
         methods: ['GET', 'POST'],
     },
 
@@ -26,7 +26,7 @@ const io = new Server(server, {
 connectDB();
 app.use(cookieParser());
 const corsOptions = {
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', "http://192.168.225.40:5173"],
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
                 });
             })
         });
-        
+
         socket.on(ACTIONS.UNMUTE, ({ roomId, userId }) => {
             const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
             clients.forEach(clientId => {
