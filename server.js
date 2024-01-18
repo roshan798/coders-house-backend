@@ -36,24 +36,19 @@ app.use(express.json({ limit: '8mb' }));
 // Sockets
 const socketUserMapping = {}
 io.on('connection', (socket) => {
-    // console.log('new connection', socket.id);
 
     socket.on(ACTIONS.JOIN, ({ roomId, user }) => {
-        // console.log("ACTION.JOIN", roomId);
         socketUserMapping[socket.id] = user;
-        // is a Map
         const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
 
         clients.forEach((clientId) => {
 
-            // FROM backent ADD_PEER 
             io.to(clientId).emit(ACTIONS.ADD_PEER,
                 {
                     peerId: socket.id,
                     createOffer: false,
                     user: user
                 });
-            // TO add peer 
             socket.emit(ACTIONS.ADD_PEER,
                 {
                     peerId: clientId,
@@ -74,13 +69,11 @@ io.on('connection', (socket) => {
 
         // handle relay sdp(session description)
         socket.on(ACTIONS.RELAY_SDP, ({ peerId, sessionDescription }) => {
-            // console.log("ACTIONS.RELAY_SDP",peerId);
             io.to(peerId).emit(ACTIONS.SESSION_DESCRIPTION, {
                 peerId: socket.id,
                 sessionDescription
             });
         });
-        //handle MUTE/UNMUTE
 
         socket.on(ACTIONS.MUTE, ({ roomId, userId }) => {
             const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
@@ -104,9 +97,7 @@ io.on('connection', (socket) => {
 
         // handle remove peer
         const leaveRoom = ({ roomId }) => {
-            // console.log("Leave room called with room Id-> ", roomId);
             const { rooms } = socket;
-            // console.log(Array.from(rooms));
             Array.from(rooms).forEach(roomId => {
                 const clients = Array.from(io.sockets.adapter.rooms.get(roomId));
 
