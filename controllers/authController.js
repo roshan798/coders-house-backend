@@ -54,14 +54,14 @@ class authController {
         const [hashedOtp, expires] = hash.split('.');
         if (Date.now() > expires) {
             return res.status(400).json({
-                message: "otp expired"
+                message: "Otp expired"
             });
         }
         const data = `${sender}.${otp}.${expires}`;
         const isValid = otpService.verifyOtp(data, hashedOtp)
         if (isValid === false) {
             return res.status(400).json({
-                message: "incorrect otp!!!"
+                message: "Incorrect otp!"
             });
         }
         let user;
@@ -79,9 +79,8 @@ class authController {
                 }
             }
         } catch (error) {
-            // console.log(error);
             return res.status(500).json({
-                msg: "Unable create user account",
+                message: "Unable create user account",
                 error,
             });
         }
